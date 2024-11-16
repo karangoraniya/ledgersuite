@@ -46,3 +46,37 @@ export type ERC7730Template = {
     >;
   };
 };
+
+// API ROutes
+
+export type TimeRange = "1day" | "1week" | "1month" | "1year" | "3years";
+
+export interface ChainAPi {
+  id: number;
+  name: string;
+  symbol: string;
+}
+
+export interface PortfolioData {
+  totalValueUSD: number;
+  totalPnLUSD: number;
+  averageRoi: number;
+  tokens: Token[];
+}
+
+export interface Token {
+  symbol: string;
+  address: string;
+  chainName: string;
+  price_usd: string;
+  amount: string;
+  chainId: number;
+}
+
+export interface PortfolioData {
+  totalValueUSD: number;
+  totalPnLUSD: number;
+  averageRoi: number;
+  chainData: ChainAPi[];
+  tokens: Token[];
+}
