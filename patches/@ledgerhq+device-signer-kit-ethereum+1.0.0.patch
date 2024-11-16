@@ -1,0 +1,26 @@
+diff --git a/node_modules/@ledgerhq/device-signer-kit-ethereum/lib/cjs/internal/transaction/service/mapper/EthersV6TransactionMapper.js b/node_modules/@ledgerhq/device-signer-kit-ethereum/lib/cjs/internal/transaction/service/mapper/EthersV6TransactionMapper.js
+index 3eb384b..44c9797 100644
+--- a/node_modules/@ledgerhq/device-signer-kit-ethereum/lib/cjs/internal/transaction/service/mapper/EthersV6TransactionMapper.js
++++ b/node_modules/@ledgerhq/device-signer-kit-ethereum/lib/cjs/internal/transaction/service/mapper/EthersV6TransactionMapper.js
+@@ -26,7 +26,7 @@ let EthersV6TransactionMapper = class EthersV6TransactionMapper {
+         return purify_ts_1.Nothing;
+     }
+     isEthersV6Transaction(transaction) {
+-        return transaction instanceof ethers_v6_1.Transaction;
++        return true;
+     }
+ };
+ exports.EthersV6TransactionMapper = EthersV6TransactionMapper;
+diff --git a/node_modules/@ledgerhq/device-signer-kit-ethereum/lib/esm/internal/transaction/service/mapper/EthersV6TransactionMapper.js b/node_modules/@ledgerhq/device-signer-kit-ethereum/lib/esm/internal/transaction/service/mapper/EthersV6TransactionMapper.js
+index 02ec6e0..68f9a5c 100644
+--- a/node_modules/@ledgerhq/device-signer-kit-ethereum/lib/esm/internal/transaction/service/mapper/EthersV6TransactionMapper.js
++++ b/node_modules/@ledgerhq/device-signer-kit-ethereum/lib/esm/internal/transaction/service/mapper/EthersV6TransactionMapper.js
+@@ -23,7 +23,7 @@ let EthersV6TransactionMapper = class EthersV6TransactionMapper {
+         return Nothing;
+     }
+     isEthersV6Transaction(transaction) {
+-        return transaction instanceof EthersV6Transaction;
++        return true;
+     }
+ };
+ EthersV6TransactionMapper = __decorate([
