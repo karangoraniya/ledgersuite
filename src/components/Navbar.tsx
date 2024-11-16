@@ -1,6 +1,8 @@
 "use client";
 import React from "react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,9 +33,29 @@ const Navbar = () => {
     <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
-          <div className="flex items-center">
-            <WalletIcon className="h-6 w-6 mr-2" />
-            <span className="text-lg font-semibold">LedgerSuite</span>
+          <div className="flex items-center space-x-8">
+            <div className="flex items-center">
+              <WalletIcon className="h-6 w-6 mr-2" />
+              <Link href="/">
+                <span className="text-lg font-semibold">LedgerSuite</span>
+              </Link>
+            </div>
+
+            {/* Navigation Links */}
+            <div className="hidden md:flex space-x-6">
+              <Link
+                href="/portfolio"
+                className="text-foreground/80 hover:text-foreground transition-colors px-3 py-2 rounded-md text-sm font-medium"
+              >
+                Portfolio
+              </Link>
+              <Link
+                href="/generator"
+                className="text-foreground/80 hover:text-foreground transition-colors px-3 py-2 rounded-md text-sm font-medium"
+              >
+                ERC7730 Generator
+              </Link>
+            </div>
           </div>
 
           <div className="flex items-center space-x-4">
