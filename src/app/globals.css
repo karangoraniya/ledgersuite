@@ -2,20 +2,49 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+body {
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --gradient: linear-gradient(to top left, #3d4e81, #5753c9, #6e7ff3);
+
+    --background: 239 23.4% 2.96%;
+    --foreground: 239 3.5999999999999996% 96.85%;
+
+    --muted: 239 27.36% 11.1%;
+    --muted-foreground: 239 3.5999999999999996% 53.7%;
+
+    --popover: 239 57.8% 4.81%;
+    --popover-foreground: 239 3.5999999999999996% 96.85%;
+
+    --card: 239 57.8% 4.81%;
+    --card-foreground: 239 3.5999999999999996% 96.85%;
+
+    --border: 239 27.36% 11.1%;
+    --input: 239 27.36% 11.1%;
+
+    --primary: 239 36% 37%;
+    --primary-foreground: 239 3.5999999999999996% 96.85%;
+
+    --secondary: 239 27.36% 11.1%;
+    --secondary-foreground: 239 3.5999999999999996% 96.85%;
+
+    --accent: 239 27.36% 11.1%;
+    --accent-foreground: 239 3.5999999999999996% 96.85%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 239 3.5999999999999996% 96.85%;
+
+    --ring: 239 36% 37%;
   }
 }
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
