@@ -1,5 +1,5 @@
 "use client";
-
+import { useEffect, useState } from "react";
 import {
   DeviceActionState,
   DeviceActionStatus,
@@ -14,7 +14,6 @@ import {
   KeyringEth,
   KeyringEthBuilder,
 } from "@ledgerhq/device-signer-kit-ethereum";
-import { useEffect, useState } from "react";
 import { firstValueFrom } from "rxjs";
 import {
   Card,
@@ -31,6 +30,14 @@ import { WalletIcon, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { SendTransaction } from "@/components/SendTransaction";
 import { useNetwork } from "@/context/NetworkContext";
+import { Copy, Check } from "lucide-react";
+import { ethers } from "ethers";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import { NetworkIcon } from "lucide-react";
 interface WalletState {
@@ -40,12 +47,23 @@ interface WalletState {
   error: string | null;
 }
 
+interface Balance {
+  formatted: string;
+  symbol: string;
+  loading: boolean;
+}
+
 export default function WalletConnection() {
-  // SDK and session states
   const [sdk, setSdk] = useState<DeviceSdk | null>(null);
   const [deviceSessionId, setSessionId] = useState<DeviceSessionId>();
   const [connectionError, setConnectionError] = useState<unknown>();
-  const [keyringEth, setKeyringEth] = useState<KeyringEth | null>(null); // Add this state
+  const [keyringEth, setKeyringEth] = useState<KeyringEth | null>(null);
+  const [balance, setBalance] = useState<Balance>({
+    formatted: "0",
+    symbol: "ETH",
+    loading: false,
+  });
+  const [copied, setCopied] = useState(false);
 
   const { currentNetwork, provider } = useNetwork();
 
@@ -82,6 +100,40 @@ export default function WalletConnection() {
 
     initializeSdk();
   }, []);
+
+  useEffect(() => {
+    const fetchBalance = async () => {
+      if (provider && walletState.address) {
+        setBalance((prev) => ({ ...prev, loading: true }));
+        try {
+          const balance = await provider.getBalance(walletState.address);
+          const formatted = ethers.formatEther(balance);
+          setBalance({
+            formatted: (+formatted).toFixed(4),
+            symbol: currentNetwork.symbol || "ETH",
+            loading: false,
+          });
+        } catch (error) {
+          console.error("Error fetching balance:", error);
+          setBalance((prev) => ({ ...prev, loading: false }));
+        }
+      }
+    };
+
+    fetchBalance();
+    // Set up interval to refresh balance
+    const interval = setInterval(fetchBalance, 50000); // every 15 seconds
+
+    return () => clearInterval(interval);
+  }, [provider, walletState.address, currentNetwork]);
+
+  const copyAddress = async () => {
+    if (walletState.address) {
+      await navigator.clipboard.writeText(walletState.address);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   // Connect to Ledger device
   const connectWallet = async () => {
@@ -252,21 +304,64 @@ export default function WalletConnection() {
         {/* Connected State */}
         {walletState.isConnected && walletState.address && (
           <div className="space-y-4">
-            {/* Address Display */}
+            {/* Address and Balance Display */}
             <div className="p-4 rounded-lg border bg-muted">
-              <div className="text-sm font-medium mb-1">Connected Address</div>
-              <div className="font-mono text-xs break-all">
-                {walletState.address}
-              </div>
+              <div className="space-y-3">
+                {/* First row: Address and Copy button */}
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1 flex-1">
+                    <div className="text-sm font-medium mb-1">
+                      Connected Address
+                    </div>
+                    <div className="font-mono text-xs break-all flex items-center gap-2 group">
+                      {walletState.address}
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={copyAddress}
+                            >
+                              {copied ? (
+                                <Check className="h-3 w-3" />
+                              ) : (
+                                <Copy className="h-3 w-3" />
+                              )}
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{copied ? "Copied!" : "Copy address"}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm font-medium mb-1">Balance</div>
+                    <div className="text-sm">
+                      {balance.loading ? (
+                        <Skeleton className="h-4 w-24" />
+                      ) : (
+                        <span className="font-medium">
+                          {balance.formatted} {balance.symbol}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
 
-              <a
-                href={`${currentNetwork.blockExplorer}/address/${walletState.address}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-blue-500 hover:underline mt-1 inline-block"
-              >
-                View on {currentNetwork.name} Explorer
-              </a>
+                {/* Explorer Link */}
+                <a
+                  href={`${currentNetwork.blockExplorer}/address/${walletState.address}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-primary hover:underline inline-block"
+                >
+                  View on {currentNetwork.name} Explorer
+                </a>
+              </div>
             </div>
 
             {/* Transaction Component */}
