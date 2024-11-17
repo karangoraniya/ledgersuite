@@ -10,6 +10,7 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
+    "@ensdomains/address-encoder": "^1.1.2",
     "@ledgerhq/context-module": "^1.0.0",
     "@ledgerhq/device-management-kit": "^0.4.0",
     "@ledgerhq/device-signer-kit-ethereum": "^1.0.0",
