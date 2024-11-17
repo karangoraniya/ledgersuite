@@ -28,6 +28,7 @@ import {
 } from "recharts";
 import { WalletIcon, SearchIcon, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useResolveAddress } from "@/hooks/useENS";
 
 // Types
 type TimeRange = "1day" | "1week" | "1month" | "1year" | "3years";
@@ -114,7 +115,10 @@ const PortfolioDashboard = () => {
     SUPPORTED_CHAINS[0].id.toString()
   );
   const [isChainSwitching, setIsChainSwitching] = useState(false);
-
+  const { resolvedAddress, error: resolveError } = useResolveAddress(
+    searchAddress,
+    "ethereum"
+  );
   //new
   // const [selectedChain, setSelectedChain] = useState("1"); // Default to Ethereum
   const [chartData, setChartData] = useState<{ date: string; value: number }[]>(
@@ -312,10 +316,12 @@ const PortfolioDashboard = () => {
     }
   };
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (searchAddress) {
-      fetchPortfolioData(searchAddress);
+      // Use the resolved address if available, otherwise use the input address
+      const addressToSearch = resolvedAddress || searchAddress;
+      await fetchPortfolioData(addressToSearch);
     }
   };
 
@@ -364,16 +370,27 @@ const PortfolioDashboard = () => {
 
           <CardContent className="p-6">
             {/* Search Form */}
+
             <form onSubmit={handleSearch} className="flex gap-4 mb-6">
               <div className="relative flex-1">
                 <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
                 <Input
                   type="text"
-                  placeholder="Search by wallet address..."
+                  placeholder="Enter ENS or wallet address..."
                   value={searchAddress}
                   onChange={(e) => setSearchAddress(e.target.value)}
                   className="pl-10 bg-muted text-foreground"
                 />
+                {resolvedAddress && searchAddress !== resolvedAddress && (
+                  <div className="absolute left-0 right-0 mt-1 p-2 bg-muted border border-border rounded-md text-sm">
+                    Resolved: {resolvedAddress}
+                  </div>
+                )}
+                {resolveError && (
+                  <div className="absolute left-0 right-0 mt-1 p-2 bg-destructive/10 border border-destructive/20 rounded-md text-sm text-destructive">
+                    {resolveError}
+                  </div>
+                )}
               </div>
               <button
                 type="submit"

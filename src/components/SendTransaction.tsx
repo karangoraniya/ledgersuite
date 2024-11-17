@@ -19,6 +19,7 @@ import { ethers, Signature as EthersSignature, Transaction } from "ethers";
 import { NetworkConfig } from "@/config/networks";
 import { DeviceActionStatus } from "@ledgerhq/device-management-kit";
 import { BigNumber } from "ethers-v5";
+import { useResolveAddress } from "@/hooks/useENS";
 
 interface SendTransactionProps {
   keyringEth: any;
@@ -41,7 +42,10 @@ export const SendTransaction = ({
   const [balance, setBalance] = useState<string>("0");
   const [nonce, setNonce] = useState<number>(0);
   const [gasPrice, setGasPrice] = useState<string>("");
-
+  const { resolvedAddress, error: resolveError } = useResolveAddress(
+    recipient,
+    "ethereum"
+  );
   const resetForm = () => {
     setRecipient("");
     setAmount("");
@@ -98,11 +102,12 @@ export const SendTransaction = ({
     try {
       setIsLoading(true);
       const toastId = toast.loading("Preparing transaction...");
+      const recipientAddress = resolvedAddress || recipient;
 
       // Get the latest nonce
       const currentNonce = await provider.getTransactionCount(address);
       console.log("Current nonce:", currentNonce);
-
+      console.log("address get", address);
       // Get gas price
       // const feeData = await provider.getFeeData();
 
@@ -112,15 +117,13 @@ export const SendTransaction = ({
       // Convert amount to wei using ethers v5 BigNumber
       const valueInWei = BigNumber.from(ethers.parseEther(amount).toString());
       console.log("Value in wei:", valueInWei.toString());
-
+      console.log("recipientAddress", recipientAddress);
       const transaction = {
-        to: recipient,
+        to: recipientAddress,
         gasPrice: currentGasPrice.gasPrice,
         // gasPrice: ethers.parseUnits(currentGasPrice, "wei"),
         gasLimit: 21000,
-        nonce: await provider.getTransactionCount(
-          "0xDad77910DbDFdE764fC21FCD4E74D71bBACA6D8D"
-        ),
+        nonce: await provider.getTransactionCount(address),
         chainId: network.chainId,
         data: "0x",
         value: ethers.parseEther(amount),
@@ -244,7 +247,7 @@ export const SendTransaction = ({
               </AlertDescription>
             </Alert>
 
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <Label htmlFor="recipient">Recipient Address</Label>
               <Input
                 id="recipient"
@@ -252,6 +255,28 @@ export const SendTransaction = ({
                 value={recipient}
                 onChange={(e) => setRecipient(e.target.value)}
               />
+            </div> */}
+            <div className="space-y-2">
+              <Label htmlFor="recipient">Recipient Address</Label>
+              <div className="space-y-2">
+                <Input
+                  id="recipient"
+                  placeholder="ENS name or address (0x...)"
+                  value={recipient}
+                  onChange={(e) => setRecipient(e.target.value)}
+                  className={resolveError ? "border-red-500" : ""}
+                />
+                {resolvedAddress && recipient !== resolvedAddress && (
+                  <div className="px-2 py-1 text-xs bg-muted border rounded-md">
+                    Resolved: {resolvedAddress}
+                  </div>
+                )}
+                {resolveError && (
+                  <div className="px-2 py-1 text-xs text-destructive bg-destructive/10 border-destructive/20 rounded-md">
+                    {resolveError}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -277,10 +302,27 @@ export const SendTransaction = ({
               />
             </div>
 
-            <Button
+            {/* <Button
               className="w-full"
               onClick={handleSendTransaction}
               disabled={isLoading || !recipient || !amount}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <SendHorizontal className="mr-2 h-4 w-4" />
+                  Send {network.symbol}
+                </>
+              )}
+            </Button> */}
+            <Button
+              className="w-full"
+              onClick={handleSendTransaction}
+              disabled={isLoading || !recipient || !amount || !!resolveError}
             >
               {isLoading ? (
                 <>
